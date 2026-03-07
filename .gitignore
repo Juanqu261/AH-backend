@@ -1,0 +1,29 @@
+node_modules
+dist
+build
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Generated Prisma code
+.prisma/
+migrations/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
