@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@/.prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const connectionString = process.env.DATABASE_URL;
 // We configure a pool which the neon serverless driver handles well.

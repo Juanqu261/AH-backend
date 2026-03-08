@@ -4,7 +4,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { logger } from '@/utils/logger';
 import { ShopifyProduct } from '@/services/shopify/shopify.types';
 import { shopifyClient } from '@/services/shopify/shopify.service';
-import { PrismaClient } from '@/.prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Servicio de sincronización Shopify → Base de datos

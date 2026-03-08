@@ -1,5 +1,5 @@
 import { prisma } from '@/config/db';
-import { Prisma } from '@/.prisma/client';
+import { Prisma } from '@prisma/client';
 
 export const getProducts = async (params: { skip?: number; take?: number; search?: string }) => {
     const { skip = 0, take = 20, search } = params;
