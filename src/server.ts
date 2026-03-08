@@ -56,21 +56,24 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 // ==========================================
 // Cron Jobs Initialization
 // ==========================================
-const syncSchedule = process.env.SYNC_CRON_SCHEDULE || '0 */4 * * *';
+const syncSchedule = process.env.SYNC_CRON_SCHEDULE || '0 */4 * * *'; // Every 4 hours
 
 if (process.env.SYNC_ENABLED !== 'false') {
+    // Delta Sync (Frequent updates)
     cron.schedule(syncSchedule, async () => {
-        console.log(`[Cron] Triggering shopify-sync job at ${new Date().toISOString()}`);
+        console.log(`[Cron] Triggering Delta shopify-sync job at ${new Date().toISOString()}`);
         try {
-            // TODO: Call the actual sync service/job here
-            // await syncService.runDeltaSync();
+            // By default, delta sync runs for the last 4 hours (to match the cron schedule roughly)
+            const since = new Date();
+            since.setHours(since.getHours() - 4);
+            await shopifySyncJob.executeDeltaSync(since);
         } catch (error) {
-            console.error('[Cron] Error during shopify-sync execution', error);
+            console.error('[Cron] Error during Delta shopify-sync execution', error);
         }
     });
-    console.log(`[Cron] Scheduled shopify-sync job with expression: ${syncSchedule}`);
+    console.log(`[Cron] Scheduled Delta shopify-sync job with expression: ${syncSchedule}`);
 } else {
-    console.log('[Cron] Sync job is disabled via SYNC_ENABLED=false');
+    console.log('[Cron] Sync jobs are disabled via SYNC_ENABLED=false');
 }
 
 // ==========================================
