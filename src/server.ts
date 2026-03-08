@@ -56,16 +56,16 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 // ==========================================
 // Cron Jobs Initialization
 // ==========================================
-const syncSchedule = process.env.SYNC_CRON_SCHEDULE || '0 */4 * * *'; // Every 4 hours
+const syncSchedule = process.env.SYNC_CRON_SCHEDULE || '0 0 * * 0'; // Every Sunday at midnight
 
 if (process.env.SYNC_ENABLED !== 'false') {
     // Delta Sync (Frequent updates)
     cron.schedule(syncSchedule, async () => {
         console.log(`[Cron] Triggering Delta shopify-sync job at ${new Date().toISOString()}`);
         try {
-            // By default, delta sync runs for the last 4 hours (to match the cron schedule roughly)
+            // Delta sync looks back 7 days (roughly matching the weekly schedule)
             const since = new Date();
-            since.setHours(since.getHours() - 4);
+            since.setDate(since.getDate() - 7);
             await shopifySyncJob.executeDeltaSync(since);
         } catch (error) {
             console.error('[Cron] Error during Delta shopify-sync execution', error);
