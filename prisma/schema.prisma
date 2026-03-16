@@ -13,6 +13,17 @@ datasource db {
 }
 
 // ============================================
+// APP CONFIGURATION
+// ============================================
+
+model SiteConfig {
+  id        Int      @id @default(1)
+  config    Json     // The raw JSON content mapping to frontend site.config
+  updatedAt DateTime @updatedAt
+}
+
+
+// ============================================
 // MODELOS DE CATÁLOGO
 // ============================================
 
