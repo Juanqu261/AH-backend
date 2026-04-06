@@ -6,6 +6,8 @@ import cron from 'node-cron';
 import productRoutes from './routes/products';
 import searchRoutes from './routes/search';
 import adminRoutes from './routes/admin';
+import configRoutes from './routes/config.routes';
+import adminConfigRoutes from './routes/admin-config.routes';
 import { shopifySyncJob } from './jobs/shopify-sync.job';
 
 const app = express();
@@ -35,7 +37,9 @@ app.get('/health', (req: Request, res: Response) => {
 // Mount API Routes
 app.use('/api/products', productRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/config', configRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/config', adminConfigRoutes);
 
 // ==========================================
 // Global Error Handler
