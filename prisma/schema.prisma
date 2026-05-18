@@ -38,6 +38,7 @@ model Product {
   name            String
   description     String?   @db.Text
   priceCents      Int?      // Base price in cents (usually from first variant)
+  principalNotes  Json?     // Top, heart and base notes extracted from description via LLM
   
   // Relaciones
   variants        ProductVariant[]

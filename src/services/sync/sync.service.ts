@@ -5,6 +5,7 @@ import { logger } from '@/utils/logger';
 import { ShopifyProduct } from '@/services/shopify/shopify.types';
 import { shopifyClient } from '@/services/shopify/shopify.service';
 import { PrismaClient } from '@prisma/client';
+import { llmService } from '@/services/llm/llm.service';
 
 /**
  * Servicio de sincronización Shopify → Base de datos
@@ -306,6 +307,22 @@ export class SyncService {
 
       wasCreated = !dbProduct.lastSyncedAt ||
         (new Date(dbProduct.updatedAt).getTime() === new Date().getTime());
+
+      // Llamada al LLM solo si es la primera vez (wasCreated) o no tiene notas de principio
+      // para evitar múltiples solicitudes (user strict request)
+      if (wasCreated || dbProduct.principalNotes === null) {
+        if (product.description) {
+            logger.info(`Extracting principal notes with LLM for ${product.title}`);
+            const notes = await llmService.extractPrincipalNotes(product.description, product.title);
+            if (notes) {
+                await prisma.product.update({
+                    where: { id: dbProduct.id },
+                    data: { principalNotes: notes as any }
+                });
+                logger.info(`Principal notes populated for ${product.title}`);
+            }
+        }
+      }
 
       // 2. Procesar variantes
       for (const variantEdge of product.variants.edges) {
