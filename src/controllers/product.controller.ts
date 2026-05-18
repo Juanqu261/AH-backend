@@ -15,6 +15,27 @@ export const getProducts = async (req: Request, res: Response) => {
     }
 };
 
+export const getProductByHandle = async (req: Request, res: Response) => {
+    try {
+        const handle = req.params.handle as string;
+        if (!handle) {
+            res.status(400).json({ error: 'Invalid product handle' });
+            return;
+        }
+
+        const product = await productService.getProductByHandle(handle);
+        if (!product) {
+            res.status(404).json({ error: 'Product not found' });
+            return;
+        }
+
+        res.json(product);
+    } catch (error) {
+        console.error('[ProductController] getProductByHandle Error:', error);
+        res.status(500).json({ error: 'Failed to fetch product' });
+    }
+};
+
 export const getProductById = async (req: Request, res: Response) => {
     try {
         const id = parseInt(req.params.id as string, 10);
