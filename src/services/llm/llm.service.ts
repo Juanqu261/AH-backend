@@ -48,7 +48,7 @@ ${description}
 JSON Output:`;
 
             const response = await this.anthropic.messages.create({
-                model: 'claude-3-haiku-20240307',
+                model: 'claude-haiku-4-5-20251001',
                 max_tokens: 300,
                 temperature: 0.4, // Slightly higher to allow deduction 
                 system: "You are an expert fragrance investigator. You deduce the correct structural notes of perfumes from their descriptions or industry knowledge, outputting valid JSON only.",
