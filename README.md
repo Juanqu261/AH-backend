@@ -68,6 +68,34 @@ npm run sync:delta         # products updated in the last 7 days
 
 A delta sync also runs on the `SYNC_CRON_SCHEDULE` (default `0 0 * * 0`, weekly). Set `SYNC_ENABLED=false` to disable the cron.
 
+## Spanish translations
+
+Each `Product` row carries Spanish-translated copies of its key fields alongside the English originals:
+
+| English (source) | Spanish |
+|---|---|
+| `name` | `nameEs` |
+| `description` | `descriptionEs` |
+| `principalNotes` | `principalNotesEs` |
+
+A `translationSourceHash` column stores a sha256 of the English `title::description` at the moment the translation was produced. Translations are generated inside `processProduct()` (`src/services/sync/sync.service.ts`) via `translationService.translateProductToSpanish()` (`src/services/llm/translation.service.ts`), which calls Claude Haiku 4.5 with a prompt that explicitly forbids translating commercial fragrance/brand names (e.g. "Aventus", "Sauvage", "Baccarat Rouge 540" must remain unchanged).
+
+A product is (re-)translated only when one of these is true, which keeps API spend flat and avoids wording drift across syncs:
+
+- `translationSourceHash` is `NULL` (never translated yet), **or**
+- the current source hash differs from the stored one (the English copy changed in Shopify), **or**
+- `descriptionEs` is `NULL`.
+
+### Forcing a re-translation later
+
+If you want to re-translate everything without wiping data (e.g. after improving the prompt):
+
+```sql
+UPDATE "Product" SET "translationSourceHash" = NULL;
+```
+
+Then run `npm run translate:backfill` again. To re-translate a single product, scope the `UPDATE` with a `WHERE` clause.
+
 ## Required env vars
 
 `DATABASE_URL`, `SHOPIFY_STORE`, `SHOPIFY_CLIENT_ID`, `SHOPIFY_CLIENT_SECRET`, `ANTHROPIC_API_KEY`, `SYNC_ADMIN_KEY`, `FRONTEND_URL`. See `.env.example`.

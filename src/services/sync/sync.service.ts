@@ -5,7 +5,9 @@ import { logger } from '@/utils/logger';
 import { ShopifyProduct } from '@/services/shopify/shopify.types';
 import { shopifyClient } from '@/services/shopify/shopify.service';
 import { PrismaClient } from '@prisma/client';
-import { llmService } from '@/services/llm/llm.service';
+import { llmService, PrincipalNotes } from '@/services/llm/llm.service';
+import { translationService } from '@/services/llm/translation.service';
+import { createHash } from 'crypto';
 
 /**
  * Servicio de sincronización Shopify → Base de datos
@@ -321,6 +323,43 @@ export class SyncService {
                 });
                 logger.info(`Principal notes populated for ${product.title}`);
             }
+        }
+      }
+
+      // Traducción al español: solo cuando falta o cuando la fuente cambió.
+      const sourceHash = createHash('sha256')
+        .update(`${product.title}::${product.description ?? ''}`)
+        .digest('hex');
+
+      const needsTranslation =
+        !dbProduct.translationSourceHash ||
+        dbProduct.translationSourceHash !== sourceHash ||
+        !dbProduct.descriptionEs;
+
+      if (needsTranslation) {
+        const fresh = await prisma.product.findUnique({
+          where: { id: dbProduct.id },
+          select: { principalNotes: true },
+        });
+
+        logger.info(`Translating to Spanish: ${product.title}`);
+        const translated = await translationService.translateProductToSpanish({
+          name: product.title,
+          description: product.description ?? null,
+          principalNotes: (fresh?.principalNotes as PrincipalNotes | null) ?? null,
+        });
+
+        if (translated) {
+          await prisma.product.update({
+            where: { id: dbProduct.id },
+            data: {
+              nameEs: translated.nameEs,
+              descriptionEs: translated.descriptionEs,
+              principalNotesEs: translated.principalNotesEs as any,
+              translationSourceHash: sourceHash,
+            },
+          });
+          logger.info(`Spanish translation populated for ${product.title}`);
         }
       }
 

@@ -39,7 +39,13 @@ model Product {
   description     String?   @db.Text
   priceCents      Int?      // Base price in cents (usually from first variant)
   principalNotes  Json?     // Top, heart and base notes extracted from description via LLM
-  
+
+  // Traducciones al español (LLM)
+  nameEs                String?  @db.Text
+  descriptionEs         String?  @db.Text
+  principalNotesEs      Json?
+  translationSourceHash String?  // sha256 of `${name}::${description}` at translation time
+
   // Relaciones
   variants        ProductVariant[]
   images          ProductImage[]

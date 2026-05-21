@@ -12,6 +12,7 @@
     "prisma:deploy": "prisma migrate deploy",
     "sync:full": "ts-node -r tsconfig-paths/register src/jobs/shopify-sync.job.ts full",
     "sync:delta": "ts-node -r tsconfig-paths/register src/jobs/shopify-sync.job.ts delta",
+    "translate:backfill": "ts-node -r tsconfig-paths/register src/jobs/translate-backfill.job.ts",
     "explore-schema": "ts-node -r tsconfig-paths/register src/jobs/explore-shopify-schema.ts"
   },
   "keywords": [],
