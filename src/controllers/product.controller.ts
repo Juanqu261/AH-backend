@@ -1,11 +1,21 @@
 import { Request, Response } from 'express';
+import { z } from 'zod';
 import * as productService from '../services/product.service';
+
+const GetProductsQuerySchema = z.object({
+    skip: z.coerce.number().int().min(0).default(0),
+    take: z.coerce.number().int().min(1).max(100).default(20),
+    q: z.string().optional(),
+});
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
-        const skip = req.query.skip ? parseInt(req.query.skip as string, 10) : 0;
-        const take = req.query.take ? parseInt(req.query.take as string, 10) : 20;
-        const search = req.query.q as string | undefined;
+        const parsed = GetProductsQuerySchema.safeParse(req.query);
+        if (!parsed.success) {
+            res.status(400).json({ error: 'Invalid query parameters', details: parsed.error.flatten() });
+            return;
+        }
+        const { skip, take, q: search } = parsed.data;
 
         const result = await productService.getProducts({ skip, take, search });
         res.json(result);

@@ -115,7 +115,7 @@ JSON Output:`;
                     descriptionEs: parsed.descriptionEs ?? null,
                     principalNotesEs: parsed.principalNotesEs ?? null,
                 };
-            } catch (parseError) {
+            } catch (_parseError) {
                 logger.error(`Failed to parse translation response into JSON. Raw response: ${responseText}`);
                 return null;
             }

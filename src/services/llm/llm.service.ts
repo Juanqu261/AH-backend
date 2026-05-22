@@ -78,7 +78,7 @@ JSON Output:`;
                 const jsonStr = responseText.substring(startIdx, endIdx + 1);
                 const result = JSON.parse(jsonStr) as PrincipalNotes;
                 return result;
-            } catch (parseError) {
+            } catch (_parseError) {
                 logger.error(`Failed to parse LLM response into JSON. Raw response: ${responseText}`);
                 return null;
             }

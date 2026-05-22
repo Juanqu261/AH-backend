@@ -1,9 +1,19 @@
 import { Request, Response } from 'express';
+import { z } from 'zod';
 import { shopifySyncJob } from '../jobs/shopify-sync.job';
+
+const TriggerSyncQuerySchema = z.object({
+    mode: z.enum(['full', 'delta']).default('delta'),
+});
 
 export const triggerSync = async (req: Request, res: Response) => {
     try {
-        const mode = req.query.mode === 'full' ? 'full' : 'delta';
+        const parsed = TriggerSyncQuerySchema.safeParse(req.query);
+        if (!parsed.success) {
+            res.status(400).json({ error: 'Invalid mode parameter. Must be "full" or "delta".' });
+            return;
+        }
+        const { mode } = parsed.data;
 
         let result;
         if (mode === 'full') {

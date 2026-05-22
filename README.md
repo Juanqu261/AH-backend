@@ -99,3 +99,11 @@ Then run `npm run translate:backfill` again. To re-translate a single product, s
 ## Required env vars
 
 `DATABASE_URL`, `SHOPIFY_STORE`, `SHOPIFY_CLIENT_ID`, `SHOPIFY_CLIENT_SECRET`, `ANTHROPIC_API_KEY`, `SYNC_ADMIN_KEY`, `FRONTEND_URL`. See `.env.example`.
+
+## Security
+
+- **Helmet** sets secure HTTP response headers (CSP, HSTS, X-Frame-Options, etc.) on every response.
+- **Rate limiting**: all routes — 100 req / 15 min per IP; admin routes — additional 20 req / 15 min cap.
+- **Request validation**: all mutable/parametric endpoints validated with Zod v4 schemas (see `controllers/`).
+- **Static analysis**: `npm run lint` runs `@typescript-eslint` + `eslint-plugin-security`.
+- **Dependency audit**: `npm run audit:check` surfaces high/critical CVEs via `npm audit`.

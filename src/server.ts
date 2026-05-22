@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import cron from 'node-cron';
 
 import productRoutes from './routes/products';
@@ -16,12 +18,31 @@ const port = process.env.PORT || 3000;
 // ==========================================
 // Global Middleware
 // ==========================================
+app.use(helmet());
+
+const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' }
+});
+
+const adminLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many admin requests, please try again later.' }
+});
+
 app.use(cors({
     origin: process.env.FRONTEND_URL || '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
 
 app.use(express.json());
+app.use(generalLimiter);
 
 // ==========================================
 // Healthcheck & Routes
@@ -38,13 +59,13 @@ app.get('/health', (req: Request, res: Response) => {
 app.use('/api/products', productRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/config', configRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/admin/config', adminConfigRoutes);
+app.use('/api/admin', adminLimiter, adminRoutes);
+app.use('/api/admin/config', adminLimiter, adminConfigRoutes);
 
 // ==========================================
 // Global Error Handler
 // ==========================================
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     console.error('[Global Error]', err);
 
     const status = err.status || 500;

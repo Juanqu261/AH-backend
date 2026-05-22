@@ -1,5 +1,19 @@
 import { Request, Response } from 'express';
+import { z } from 'zod';
 import { prisma } from '../config/db';
+
+const CollectionSchema = z.object({
+    slug: z.string().min(1),
+    name: z.string().min(1),
+    description: z.string(),
+    products: z.array(z.string()),
+});
+
+const SiteConfigSchema = z.object({
+    spottedProduct: z.string().min(1),
+    catalogRecommendations: z.array(z.string()),
+    collections: z.array(CollectionSchema),
+});
 
 // Seed data based on public/site.config.json
 const DEFAULT_CONFIG = {
@@ -52,12 +66,12 @@ export const getConfig = async (req: Request, res: Response): Promise<void> => {
 
 export const updateConfig = async (req: Request, res: Response): Promise<void> => {
     try {
-        const newConfig = req.body;
-
-        if (!newConfig || typeof newConfig !== 'object') {
-            res.status(400).json({ error: 'Invalid configuration format. Must be a JSON object.' });
+        const parsed = SiteConfigSchema.safeParse(req.body);
+        if (!parsed.success) {
+            res.status(400).json({ error: 'Invalid configuration', details: parsed.error.flatten() });
             return;
         }
+        const newConfig = parsed.data;
 
         const siteConfig = await prisma.siteConfig.upsert({
             where: { id: 1 },
