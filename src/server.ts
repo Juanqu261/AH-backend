@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cron from 'node-cron';
@@ -18,6 +19,7 @@ const port = process.env.PORT || 3000;
 // ==========================================
 // Global Middleware
 // ==========================================
+app.use(compression());
 app.use(helmet());
 
 const generalLimiter = rateLimit({

@@ -18,6 +18,7 @@ export const getProducts = async (req: Request, res: Response) => {
         const { skip, take, q: search } = parsed.data;
 
         const result = await productService.getProducts({ skip, take, search });
+        res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
         res.json(result);
     } catch (error) {
         console.error('[ProductController] getProducts Error:', error);
@@ -39,6 +40,7 @@ export const getProductByHandle = async (req: Request, res: Response) => {
             return;
         }
 
+        res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
         res.json(product);
     } catch (error) {
         console.error('[ProductController] getProductByHandle Error:', error);
@@ -60,6 +62,7 @@ export const getProductById = async (req: Request, res: Response) => {
             return;
         }
 
+        res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
         res.json(product);
     } catch (error) {
         console.error('[ProductController] getProductById Error:', error);

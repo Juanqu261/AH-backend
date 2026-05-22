@@ -107,3 +107,12 @@ Then run `npm run translate:backfill` again. To re-translate a single product, s
 - **Request validation**: all mutable/parametric endpoints validated with Zod v4 schemas (see `controllers/`).
 - **Static analysis**: `npm run lint` runs `@typescript-eslint` + `eslint-plugin-security`.
 - **Dependency audit**: `npm run audit:check` surfaces high/critical CVEs via `npm audit`.
+
+## Performance
+
+- **Compression**: gzip on all responses via `compression` middleware (~60–80% payload reduction).
+- **HTTP cache headers**: `Cache-Control: public, max-age=300` on product endpoints; `max-age=600` on config.
+- **Prisma field selection**: `select` queries return only frontend-consumed fields (no sync metadata transferred over the wire).
+- **Connection pool**: pg pool capped at 5 connections with explicit idle/connect timeouts.
+- **Load testing**: `autocannon -c 10 -d 10 http://localhost:3000/api/products` — run before/after changes to quantify gains.
+- **Profiling**: `clinic flame -- node dist/server.js` (requires `npm run build` first; run autocannon in a second terminal).

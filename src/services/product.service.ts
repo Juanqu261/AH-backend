@@ -19,11 +19,30 @@ export const getProducts = async (params: { skip?: number; take?: number; search
             skip,
             take,
             where,
-            include: {
+            select: {
+                id: true,
+                shopifyHandle: true,
+                name: true,
+                nameEs: true,
+                description: true,
+                descriptionEs: true,
+                priceCents: true,
+                principalNotes: true,
+                principalNotesEs: true,
                 images: {
+                    select: { url: true, altText: true, cloudinaryUrl: true, position: true },
                     orderBy: { position: 'asc' }
                 },
-                variants: true
+                variants: {
+                    select: {
+                        id: true,
+                        title: true,
+                        priceCents: true,
+                        compareAtPriceCents: true,
+                        availableForSale: true,
+                        sellableQuantity: true,
+                    }
+                }
             },
             orderBy: { createdAt: 'desc' }
         })
@@ -32,26 +51,42 @@ export const getProducts = async (params: { skip?: number; take?: number; search
     return { total, products, skip, take };
 };
 
+const PRODUCT_SELECT = {
+    id: true,
+    shopifyHandle: true,
+    name: true,
+    nameEs: true,
+    description: true,
+    descriptionEs: true,
+    priceCents: true,
+    principalNotes: true,
+    principalNotesEs: true,
+    images: {
+        select: { url: true, altText: true, cloudinaryUrl: true, position: true },
+        orderBy: { position: 'asc' as const }
+    },
+    variants: {
+        select: {
+            id: true,
+            title: true,
+            priceCents: true,
+            compareAtPriceCents: true,
+            availableForSale: true,
+            sellableQuantity: true,
+        }
+    }
+} as const;
+
 export const getProductById = async (id: number) => {
     return prisma.product.findUnique({
         where: { id },
-        include: {
-            images: {
-                orderBy: { position: 'asc' }
-            },
-            variants: true
-        }
+        select: PRODUCT_SELECT
     });
 };
 
 export const getProductByHandle = async (handle: string) => {
     return prisma.product.findFirst({
         where: { shopifyHandle: handle },
-        include: {
-            images: {
-                orderBy: { position: 'asc' }
-            },
-            variants: true
-        }
+        select: PRODUCT_SELECT
     });
 };

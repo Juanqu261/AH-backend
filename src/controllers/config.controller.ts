@@ -52,11 +52,12 @@ export const getConfig = async (req: Request, res: Response): Promise<void> => {
         });
 
         if (!siteConfig) {
-            // Give them the default if it doesn't exist yet
+            res.set('Cache-Control', 'public, max-age=600, stale-while-revalidate=120');
             res.json(DEFAULT_CONFIG);
             return;
         }
 
+        res.set('Cache-Control', 'public, max-age=600, stale-while-revalidate=120');
         res.json(siteConfig.config);
     } catch (error) {
         console.error('[ConfigController] Error fetching config:', error);
