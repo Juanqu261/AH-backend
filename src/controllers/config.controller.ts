@@ -9,10 +9,21 @@ const CollectionSchema = z.object({
     products: z.array(z.string()),
 });
 
+// Display pricing. Products are stored in raw USD (from Shopify); these settings
+// control how prices are presented to end users (e.g. converted to COP).
+const PricingSchema = z
+    .object({
+        usdToCop: z.number().positive().default(1), // multiplier: 1 USD = N display-currency units
+        currencyCode: z.string().min(1).default('USD'),
+        roundTo: z.number().min(0).default(0), // round displayed amount to nearest N (0 = no rounding)
+    })
+    .default({ usdToCop: 1, currencyCode: 'USD', roundTo: 0 });
+
 const SiteConfigSchema = z.object({
     spottedProduct: z.string().min(1),
     catalogRecommendations: z.array(z.string()),
     collections: z.array(CollectionSchema),
+    pricing: PricingSchema,
 });
 
 // Seed data based on public/site.config.json
@@ -22,6 +33,11 @@ const DEFAULT_CONFIG = {
         "chanel-n-5",
         "dior-sauvage-edp"
     ],
+    pricing: {
+        usdToCop: 1,
+        currencyCode: "USD",
+        roundTo: 0
+    },
     collections: [
         {
             slug: "avant-garde",
@@ -52,7 +68,9 @@ export const getConfig = async (req: Request, res: Response): Promise<void> => {
         });
 
         if (!siteConfig) {
-            res.set('Cache-Control', 'public, max-age=600, stale-while-revalidate=120');
+            // Short cache so admin edits (e.g. pricing) reflect on the next reload.
+            // The payload is tiny and the SPA caches it in memory per session anyway.
+            res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=60');
             res.json(DEFAULT_CONFIG);
             return;
         }

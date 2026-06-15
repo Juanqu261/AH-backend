@@ -96,6 +96,10 @@ UPDATE "Product" SET "translationSourceHash" = NULL;
 
 Then run `npm run translate:backfill` again. To re-translate a single product, scope the `UPDATE` with a `WHERE` clause.
 
+## Display pricing
+
+Products are stored in raw USD (from Shopify). The site config carries a `pricing` block (`{ usdToCop, currencyCode, roundTo }`) that the frontend uses to convert prices at display time — e.g. `usdToCop: 5000`, `currencyCode: "COP"`, `roundTo: 1000`. Defaults (`1` / `USD` / `0`) show prices unchanged. Edited via the admin dashboard, validated in `config.controller.ts`. No DB migration — it lives in the existing `SiteConfig.config` JSON.
+
 ## Required env vars
 
 `DATABASE_URL`, `SHOPIFY_STORE`, `SHOPIFY_CLIENT_ID`, `SHOPIFY_CLIENT_SECRET`, `ANTHROPIC_API_KEY`, `SYNC_ADMIN_KEY`, `FRONTEND_URL`. See `.env.example`.
